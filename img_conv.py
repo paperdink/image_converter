@@ -35,9 +35,9 @@ image_name = os.path.basename(args.image_path).split('.')[0]
 logging.info("Processing {0}".format(image_name))
 
 subprocess.run(['rm', '-rf', TEMP_FILE_PATH])
-remap = '{0}.png'.format(args.device)
+remap = '{0}_map.png'.format(args.device)
 
-subprocess.check_call(['convert', args.image_path, '-dither', args.dither, '-define', 'dither:diffusion-amount={0}%'.format(args.diffusion),
+subprocess.check_call(['magick', args.image_path, '-dither', args.dither, '-define', 'dither:diffusion-amount={0}%'.format(args.diffusion),
                         '-remap', remap, 'BMP3:{0}'.format(TEMP_FILE_PATH)])
 
 logging.info("Outputing {0}".format(args.output_type))
