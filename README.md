@@ -8,12 +8,9 @@
 
 ## Usage
 ```
-usage: img_conv.py [-h] --dev b --path p [--dither d] [--dither_diffusion f] {header,bitmap}
+usage: img_conv.py [-h] --dev b --path p [--dither d] [--dither_diffusion f]
 
-Process images to display on paperd.ink
-
-positional arguments:
-  {header,bitmap}       Output C header or bitmap format
+Generate images to display on paperd.ink
 
 options:
   -h, --help            show this help message and exit

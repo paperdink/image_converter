@@ -7,16 +7,11 @@ import os
 import logging
 import tempfile
 
-temp_dir = tempfile.gettempdir()
-TEMP_FILE_PATH = temp_dir + '/paperd_ink_output.bmp'
-
 logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # Argument parser configuration
-parser = argparse.ArgumentParser(description='Process images to display on paperd.ink')
+parser = argparse.ArgumentParser(description='Generate images to display on paperd.ink')
 
-parser.add_argument('output_type', type=str, choices=['header', 'bitmap'],
-                    help='Output C header or bitmap format')
 parser.add_argument('--dev', dest='device', metavar='b', type=str, required=True, choices=['classic', 'merlot'],
                     help='paperd.ink device')
 parser.add_argument('--path', dest='image_path', metavar='p', type=str, required=True,
@@ -36,24 +31,14 @@ logging.info("Processing for paperd.ink {0}".format(args.device))
 image_name = os.path.basename(args.image_path).split('.')[0]
 logging.info("Processing {0}".format(image_name))
 
-try:
-    os.remove(TEMP_FILE_PATH)
-except FileNotFoundError:
-    pass
-
 remap = '{0}_map.png'.format(args.device)
 
 subprocess.check_call(['magick', args.image_path, '-dither', args.dither, '-define', 'dither:diffusion-amount={0}%'.format(args.diffusion),
-                        '-remap', remap, 'BMP3:{0}'.format(TEMP_FILE_PATH)])
+                        '-remap', remap, 'BMP3:{0}.bmp'.format(image_name)])
 
-logging.info("Outputing {0}".format(args.output_type))
+logging.info("Successfully generated {0}.bmp file".format(image_name))
 
-if args.output_type == 'bitmap':    
-    subprocess.check_call(['cp', TEMP_FILE_PATH, "{0}.bmp".format(image_name)])
-    logging.info("Successfully generated {0}.bmp file".format(image_name))
-    exit(0)
-
-image = Image.open(TEMP_FILE_PATH)
+image = Image.open('{0}.bmp'.format(image_name))
 
 if image.width > 400 or image.height > 300:
     logging.error("Please resize image to 400x300 px")
