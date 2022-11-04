@@ -3,6 +3,8 @@
 ## Requirements
 - [Python 3](https://www.python.org/downloads/)
 - [ImageMagick](https://imagemagick.org/script/download.php)
+- Install python dependencies `pip install -r requirements.txt`
+
 
 ## Usage
 ```
