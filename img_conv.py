@@ -5,8 +5,10 @@ import subprocess
 import argparse
 import os
 import logging
+import tempfile
 
-TEMP_FILE_PATH = '/tmp/paperd_ink_output.bmp'
+temp_dir = tempfile.gettempdir()
+TEMP_FILE_PATH = temp_dir + '/paperd_ink_output.bmp'
 
 logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
@@ -34,7 +36,11 @@ logging.info("Processing for paperd.ink {0}".format(args.device))
 image_name = os.path.basename(args.image_path).split('.')[0]
 logging.info("Processing {0}".format(image_name))
 
-subprocess.run(['rm', '-rf', TEMP_FILE_PATH])
+try:
+    os.remove(TEMP_FILE_PATH)
+except FileNotFoundError:
+    pass
+
 remap = '{0}_map.png'.format(args.device)
 
 subprocess.check_call(['magick', args.image_path, '-dither', args.dither, '-define', 'dither:diffusion-amount={0}%'.format(args.diffusion),
