@@ -11,6 +11,8 @@ import os
 import logging
 import tempfile
 
+TEMP_FILE_PATH = tempfile.gettempdir() + '/paperd_ink_tmp.jpg'
+
 logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # Argument parser configuration
@@ -20,12 +22,12 @@ parser.add_argument('--dev', dest='device', metavar='b', type=str, required=True
                     help='paperd.ink device')
 parser.add_argument('--path', dest='image_path', metavar='p', type=str, required=True,
                     help='path of the image file')
-parser.add_argument('--dither', dest='dither', metavar='d', type=str, choices=['FloydSteinberg'],
+parser.add_argument('--dither', dest='dither', metavar='d', type=str, choices=['FloydSteinberg', 'Riemersma', 'None'],
                     default='FloydSteinberg',
-                    help='dither setting to use (default: FloydSteinberg)')
-parser.add_argument('--dither_diffusion', dest='diffusion', metavar='f', type=int, choices=range(0,100),
+                    help='dither setting to use [FloydSteinberg (default), Riemersma, None]')
+parser.add_argument('--diffusion', dest='diffusion', metavar='f', type=int, choices=range(0,100),
                     default=85,
-                    help='diffusion amount (default: 85)')
+                    help='diffusion percentage [0 to 100, default=85]')
 
 args = parser.parse_args()
 
@@ -37,7 +39,10 @@ logging.info("Processing {0}".format(image_name))
 
 remap = '{0}_map.png'.format(args.device)
 
-subprocess.check_call(['magick', args.image_path, '-dither', args.dither, '-define', 'dither:diffusion-amount={0}%'.format(args.diffusion),
+# Convert to standard format
+subprocess.check_call(['magick', args.image_path, '-background', 'white', '-flatten', '-alpha', 'off', TEMP_FILE_PATH])
+# Convert to bitmap
+subprocess.check_call(['magick', TEMP_FILE_PATH, '-dither', args.dither, '-define', 'dither:diffusion-amount={0}%'.format(args.diffusion),
                         '-remap', remap, 'BMP3:{0}.bmp'.format(image_name)])
 
 logging.info("Successfully generated {0}.bmp file".format(image_name))
@@ -46,6 +51,10 @@ image = Image.open('{0}.bmp'.format(image_name))
 
 if image.width > 400 or image.height > 300:
     logging.error("Please resize image to 400x300 px")
+    exit(-1)
+
+if image.width%8 != 0:
+    logging.error("Width of image not divisible by 8")
     exit(-1)
 
 exp_byte_count = int(image.width/8)*image.height
