@@ -96,6 +96,9 @@ if exp_byte_count != len(img_black_bytes):
 
 # Write data to C header file
 with open('{0}.h'.format(image_name), 'w') as output:
+    output.write("#define {0}_width ({1})\n".format(image_name, image.width))
+    output.write("#define {0}_height ({1})\n".format(image_name, image.height))
+    output.write("\n")
     output.write("const unsigned char {0}[{1}] = {{".format(image_name, exp_byte_count))
     for i,byte in enumerate(img_black_bytes):
         if i%16 == 0:
